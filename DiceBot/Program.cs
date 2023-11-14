@@ -1,30 +1,54 @@
 ﻿using Discord.WebSocket;
 using Discord;
+using Discord.Net;
+using Newtonsoft.Json;
 
 public class Program
 {
-    public static Task Main(string[] args) => new Program().MainAsync();
+    public static Task Main(string[] args) => new Program().MainAsync(args[0]);
 
 
     private DiscordSocketClient? _client;
 
-    public async Task MainAsync()
+    public async Task MainAsync(string token)
     {
         _client = new DiscordSocketClient();
+        var guild = _client.GetGuild(1173980055387512902);
 
-        //  You can assign your bot token to a string, and pass that in to connect.
-        //  This is, however, insecure, particularly if you plan to have your code hosted in a public repository.
-        var token = "token";
+        _client.Log += Log;
+        SlashCommandBuilder rollCommandBuilder = new SlashCommandBuilder()
+            .WithName("r")
+            .WithDescription("Rolls a dice (5d10 rolls 5 d10 dices)");
 
-        // Some alternative options would be to keep your token in an Environment Variable or a standalone file.
-        // var token = Environment.GetEnvironmentVariable("NameOfYourEnvironmentVariable");
-        // var token = File.ReadAllText("token.txt");
-        // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
+
+        _client.MessageReceived += MsgRcv;
 
         await _client.LoginAsync(TokenType.Bot, token);
+
+        try
+        {
+            await guild.CreateApplicationCommandAsync(rollCommandBuilder.Build());
+        }
+        catch (HttpException exception)
+        {
+            Console.WriteLine(exception.ToString());
+        }
+
         await _client.StartAsync();
 
         // Block this task until the program is closed.
         await Task.Delay(-1);
+    }
+
+    private Task Log(LogMessage msg)
+    {
+        Console.WriteLine(msg.ToString());
+        return Task.CompletedTask;
+    }
+
+    private Task MsgRcv(SocketMessage msg)
+    {
+        Console.WriteLine(msg.ToString());
+        return Task.CompletedTask;
     }
 }
