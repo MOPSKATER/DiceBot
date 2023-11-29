@@ -5,7 +5,7 @@ namespace DiceBot
     internal class Dicer
     {
         private Random _random = new Random();
-        private const string PATTERN = "^[0-9]{1,3}d[0-9]{1,3}$";
+        private const string PATTERN = "^[0-9]{1,3}d[0-9]{1,3}(\\+[0-9]{1,2})?$";
 
         public string RollDice(string diceString)
         {
@@ -14,7 +14,19 @@ namespace DiceBot
 
             string[] parameters = diceString.Split('d');
             int amount = int.Parse(parameters[0]);
-            int diceType = int.Parse(parameters[1]);
+            int diceType;
+            string param2 = parameters[1];
+            bool modifier = param2.Contains('+');
+            int modifierValue = 0;
+
+            if (modifier)
+            {
+                string[] typeModifyer = param2.Split('+');
+                diceType = int.Parse(typeModifyer[0]);
+                modifierValue = int.Parse(typeModifyer[1]);
+            }
+            else
+                diceType = int.Parse(parameters[1]);
 
             if (amount < 1) return "You must roll at lease 1 dice";
             if (diceType < 2) return "You must roll at least a dice with 2 faces";
@@ -35,7 +47,9 @@ namespace DiceBot
                     successes++;
             }
 
-            return string.Format("∑: {0}\n✓: {1}\n{2} [{3}]", sum, successes, diceString, string.Join(' ', values));
+            string output = modifier ? string.Format("∑: {0}\n✓: {1}+{4}={5}\n{2} [{3}]+{4}", sum, successes, diceString, string.Join(' ', values), modifierValue, successes+modifierValue) : string.Format("∑: {0}\n✓: {1}\n{2} [{3}]", sum, successes, diceString, string.Join(' ', values));
+
+            return output;
         }
     }
 }
