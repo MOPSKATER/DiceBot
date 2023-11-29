@@ -47,7 +47,7 @@ namespace DiceBot
                     successes++;
             }
 
-            string output = modifier ? string.Format("∑: {0}\n✓: {1}+{4}={5}\n{2} [{3}]+{4}", sum, successes, diceString, string.Join(' ', values), modifierValue, successes+modifierValue) : string.Format("∑: {0}\n✓: {1}\n{2} [{3}]", sum, successes, diceString, string.Join(' ', values));
+            string output = modifier ? string.Format("∑: {0}+{4}={6}\n✓: {1}+{4}={5}\n{2} [{3}]+{4}", sum, successes, diceString, string.Join(' ', values), modifierValue, successes+modifierValue, sum+modifierValue) : string.Format("∑: {0}\n✓: {1}\n{2} [{3}]", sum, successes, diceString, string.Join(' ', values));
 
             return output;
         }
