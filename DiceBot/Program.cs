@@ -1,7 +1,6 @@
 ﻿using Discord.WebSocket;
 using Discord;
 using Discord.Net;
-using System.Diagnostics;
 using DiceBot;
 
 public class Program
@@ -9,16 +8,23 @@ public class Program
     public static Task Main(string[] args) => new Program().MainAsync(args[0]);
 
 
-    private DiscordSocketClient _client = new();
     private Dicer _dicer = new();
+    private DiscordSocketClient _client = new();
 
     public async Task MainAsync(string token)
     {
         _client.Ready += Ready;
         _client.SlashCommandExecuted += SlashCommandHandler;
 
-        await _client.LoginAsync(TokenType.Bot, token);
-        await _client.StartAsync();
+        try
+        {
+            await _client.LoginAsync(TokenType.Bot, token);
+            await _client.StartAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
 
         // Block this task until the program is closed.
         await Task.Delay(-1);
@@ -26,7 +32,7 @@ public class Program
 
     private async Task Ready()
     {
-        var guild = _client.GetGuild(1173980055387512902);
+        var guild = _client.GetGuild(753315263276908625);
 
         SlashCommandBuilder rollCommandBuilder = new SlashCommandBuilder()
             .WithName("r")
@@ -45,9 +51,9 @@ public class Program
             //await _client.CreateGlobalApplicationCommandAsync(rollCommandBuilder.Build());
             //await _client.CreateGlobalApplicationCommandAsync(eRollCommandBuilder.Build());
         }
-        catch (HttpException exception)
+        catch (HttpException e)
         {
-            Console.WriteLine(exception.ToString());
+            Console.WriteLine(e.Message);
             Environment.Exit(1);
         }
         Console.WriteLine("Bot ready");
@@ -69,6 +75,13 @@ public class Program
     private async Task RollDices(SocketSlashCommand command, bool ephemeral)
     {
         string diceString = (string)command.Data.Options.First().Value;
-        await command.RespondAsync(_dicer.RollDice(diceString), ephemeral: ephemeral);
+        try
+        {
+            await command.RespondAsync(_dicer.RollDice(diceString), ephemeral: ephemeral);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 }
